@@ -37,7 +37,6 @@ TEST_F(one_POD_elem_flat_tuple_test, shallFollowElemTypeProps)
 {
     EXPECT_EQ(sizeof(elem_type), sizeof(ClassUnderTest));
     EXPECT_EQ(alignof(elem_type), alignof(ClassUnderTest));
-    EXPECT_TRUE((std::is_base_of_v<FlatTupleDetails::ElemAggregate<elem_type, 0u>, ClassUnderTest>));
 }
 
 TEST_F(one_POD_elem_flat_tuple_test, shallStoreValue)
@@ -62,7 +61,6 @@ TEST_F(one_nonPOD_elem_flat_tuple_test, shallFollowElemTypeProps)
 {
     EXPECT_EQ(sizeof(elem_type), sizeof(ClassUnderTest));
     EXPECT_EQ(alignof(elem_type), alignof(ClassUnderTest));
-    EXPECT_TRUE((std::is_base_of_v<FlatTupleDetails::ElemCompose<elem_type, 0u>, ClassUnderTest>));
 }
 
 TEST_F(one_nonPOD_elem_flat_tuple_test, shallStoreValue)
@@ -89,7 +87,7 @@ TEST_F(one_empty_elem_flat_tuple_test, shallFollowElemTypeProps)
 {
     EXPECT_EQ(sizeof(elem_type), sizeof(ClassUnderTest));
     EXPECT_EQ(alignof(elem_type), alignof(ClassUnderTest));
-    EXPECT_TRUE((std::is_base_of_v<FlatTupleDetails::ElemCompose<elem_type, 0u>, ClassUnderTest>));
+    EXPECT_TRUE(std::is_empty_v<ClassUnderTest>);
 }
 
 TEST_F(one_empty_elem_flat_tuple_test, shallStoreValue)
@@ -111,8 +109,7 @@ TEST_F(two_empty_elems_flat_tuple_test, shallFollowOneElemTypeProps)
 {
     EXPECT_EQ(sizeof(elem_type1), sizeof(ClassUnderTest));
     EXPECT_EQ(alignof(elem_type2), alignof(ClassUnderTest));
-    EXPECT_TRUE((std::is_base_of_v<FlatTupleDetails::ElemCompose<elem_type1, 0u>, ClassUnderTest>));
-    EXPECT_TRUE((std::is_base_of_v<FlatTupleDetails::ElemCompose<elem_type2, 1u>, ClassUnderTest>));
+    EXPECT_TRUE(std::is_empty_v<ClassUnderTest>);
 }
 
 TEST_F(two_empty_elems_flat_tuple_test, shallStoreValue)

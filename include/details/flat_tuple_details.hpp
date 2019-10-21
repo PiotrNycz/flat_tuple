@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <cstdint>
 #include <utility>
 #include <type_traits>
@@ -9,49 +12,62 @@ template <std::size_t I>
 struct Getter {};
 struct Nothing {};
 
-template <typename T, std::size_t I>
-struct ElemAggregate
+template <typename T>
+struct Aggregate
 {
     using element_type = T;
     element_type value{};
 
-    ElemAggregate() = default;
-    ElemAggregate(Nothing) : ElemAggregate() {}
-    ElemAggregate(T& value) : value(value) {}
-    ElemAggregate(T const& value) : value(value) {}
-    ElemAggregate(T&& value) : value(std::move(value)) {}
-    ElemAggregate(T const&& value) : value(std::move(value)) {}
-
-    element_type& get(Getter<I>) & { return value; }
-    const element_type& get(Getter<I>) const & { return value; }
-    element_type&& get(Getter<I>) && { return std::move(value); }
-    const element_type&& get(Getter<I>) const && { return std::move(value); }
+    element_type& get() & { return value; }
+    const element_type& get() const & { return value; }
+    element_type&& get() && { return std::move(value); }
+    const element_type&& get() const && { return std::move(value); }
 };
 
-template <typename T, std::size_t I>
-struct ElemCompose : T
+template <typename T>
+struct Compose : T
 {
     using element_type = T;
 
     using element_type::element_type;
-    ElemCompose() = default;
-    ElemCompose(Nothing) : ElemCompose() {}
-    ElemCompose(T& value) : element_type(value) {}
-    ElemCompose(T const& value) : element_type(value) {}
-    ElemCompose(T&& value) : element_type(std::move(value)) {}
-    ElemCompose(T const&& value) : element_type(std::move(value)) {}
+    Compose() = default;
+    Compose(T& value) : element_type(value) {}
+    Compose(T const& value) : element_type(value) {}
+    Compose(T&& value) : element_type(std::move(value)) {}
+    Compose(T const&& value) : element_type(std::move(value)) {}
 
-    element_type& get(Getter<I>) & { return *this; }
-    const element_type& get(Getter<I>) const & { return *this; }
-    element_type&& get(Getter<I>) && { return std::move(*this); }
-    const element_type&& get(Getter<I>) const && { return std::move(*this); }
+    element_type& get() & { return *this; }
+    const element_type& get() const & { return *this; }
+    element_type&& get() && { return std::move(*this); }
+    const element_type&& get() const && { return std::move(*this); }
 };
 
+template <typename T>
+using Value = std::conditional_t<std::is_empty_v<T> and not std::is_final_v<T>,
+                                 Compose<T>, Aggregate<T>>;
+
+
 template <typename T, std::size_t I>
-using Elem = std::conditional_t<std::is_class_v<T> or std::is_union_v<T>,
-                               std::conditional_t<std::is_final_v<T>,
-                                                  ElemAggregate<T, I>, ElemCompose<T, I>>,
-                               ElemAggregate<T, I>>;
+struct Elem : Value<T>
+{
+    using element_type = T;
+    using Base = Value<T>;
+
+    Elem() = default;
+    Elem(Nothing) : Elem() {}
+    Elem(T& value) : Base{value} {}
+    Elem(T const& value) : Base{value} {}
+    Elem(T&& value) : Base{std::move(value)} {}
+    Elem(T const&& value) : Base{std::move(value)} {}
+
+    using Base::get;
+
+    element_type& get(Getter<I>) & { return get(); }
+    const element_type& get(Getter<I>) const & { return get(); }
+    element_type&& get(Getter<I>) && { return std::move(this).get(); }
+    const element_type&& get(Getter<I>) const && { return std::move(this).get(); }
+};
+
 
 template <std::size_t I>
 struct PickOne;

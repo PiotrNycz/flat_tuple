@@ -5,14 +5,34 @@
 namespace pns
 {
 
-template <std::size_t I, typename T>
-decltype(auto) get(T&& t)
-{
-    return std::forward<T>(t).get(FlatTupleDetails::Getter<I>{});
-}
-
 template <typename ...T>
 using flat_tuple = typename FlatTupleDetails::Def<T...>::Type;
+
+template <std::size_t I, typename T>
+decltype(auto) get(FlatTupleDetails::Elem<T, I>& t)
+{
+    return t.get(FlatTupleDetails::Getter<I>{});
+}
+
+template <std::size_t I, typename T>
+decltype(auto) get(FlatTupleDetails::Elem<T, I>&& t)
+{
+    return std::move(t).get(FlatTupleDetails::Getter<I>{});
+}
+
+
+template <std::size_t I, typename T>
+decltype(auto) get(const FlatTupleDetails::Elem<T, I>& t)
+{
+    return t.get(FlatTupleDetails::Getter<I>{});
+}
+
+template <std::size_t I, typename T>
+decltype(auto) get(const FlatTupleDetails::Elem<T, I>&& t)
+{
+    return std::move(t).get(FlatTupleDetails::Getter<I>{});
+}
+
 
 }
 
